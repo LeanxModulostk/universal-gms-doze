@@ -7,6 +7,18 @@ set -o standalone
 # Patches Google Play services app and certain processes/services to be able to use battery optimization
 #
 
+#!/system/bin/sh
+
+MODDIR=${0%/*}
+
+SRC="$MODDIR/my_product/etc/sysconfig/google.xml"
+DST="/my_product/etc/sysconfig/google.xml"
+
+if [ -f "$SRC" ]; then
+mount -o bind "$SRC" "$DST"
+fi
+
+
 # Search and patch any conflicting modules (if present)
 
 {
