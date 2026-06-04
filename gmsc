@@ -15,8 +15,10 @@ GMS="com.google.android.gms"
 CHK_OPT() {
 local OPT="$(dumpsys deviceidle whitelist |
 awk -F',' "/$GMS/{print $2;exit}")"
-[ -z $OPT ] && echo -e "$G $1 Optimized. $N" ||
-echo -e "$R $1 Not Optimized. $N"
+
+[ -z "$OPT" ] &&
+echo -e "$G ✓ $1 Optimized. $N" ||
+echo -e "$R ✗ $1 Not Optimized. $N"
 }
 
 case $ID in
