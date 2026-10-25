@@ -11,32 +11,35 @@ set -o standalone
 
 MODDIR=${0%/*}
 
-SRC="$MODDIR/my_product/etc/sysconfig/google.xml"
-DST="/my_product/etc/sysconfig/google.xml"
-
-if [ -f "$SRC" ]; then
-mount -o bind "$SRC" "$DST"
-fi
+# Bind mount every patched file under my_product over its original
+#if [ -d "$MODDIR/my_product" ]; then
+#find "$MODDIR/my_product" -type f | while IFS= read -r SRC; do
+#DST="${SRC#$MODDIR}"
+#[ -f "$DST" ] && mount -o bind "$SRC" "$DST"
+#done
+#fi
 
 
 # Search and patch any conflicting modules (if present)
 
-{
-GMS0="\"com.google.android.gms"\"
-STR1="allow-unthrottled-location package=$GMS0"
-STR2="allow-ignore-location-settings package=$GMS0"
-STR3="allow-in-power-save package=$GMS0"
-STR4="allow-in-data-usage-save package=$GMS0"
+PKGS="com.google.android.gms com.android.vending"
+TAGS="allow-unthrottled-location allow-ignore-location-settings allow-in-power-save allow-in-data-usage-save"
+XPKG="com.android.vending"
+XTAGS="allow-in-power-save-except-idle"
 NULL="/dev/null"
-}
 
-{
 find /data/adb/* -type f -iname "*.xml" -print |
 while IFS= read -r XML; do
-for X in $XML; do
-if grep -qE "$STR1|$STR2|$STR3|$STR4" $X 2> $NULL; then
-sed -i "/$STR1/d;/$STR2/d;/$STR3/d;/$STR4/d" $X
+for P in $PKGS; do
+for T in $TAGS; do
+if grep -qF "$T package=\"$P\"" "$XML" 2> "$NULL"; then
+sed -i "\|$T package=\"$P\"|d" "$XML"
 fi
 done
 done
-}
+for T in $XTAGS; do
+if grep -qF "$T package=\"$XPKG\"" "$XML" 2> "$NULL"; then
+sed -i "\|$T package=\"$XPKG\"|d" "$XML"
+fi
+done
+done

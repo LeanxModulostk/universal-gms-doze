@@ -32,22 +32,45 @@ abort "- Unsupported API version: $API"
 
 # Patch the XML and place the modified one to the original directory
 ui_print "- Patching XML files"
-{
-GMS0="\"com.google.android.gms"\"
-STR1="allow-in-power-save package=$GMS0"
-STR2="allow-in-data-usage-save package=$GMS0"
-STR3="allow-unthrottled-location package=$GMS0"
-STR4="allow-ignore-location-settings package=$GMS0"
-STR5="<wl>com.google.android.gms</wl>"
+PKGS="com.google.android.gms com.android.vending"
+TAGS="allow-in-power-save allow-in-data-usage-save allow-unthrottled-location allow-ignore-location-settings"
+XPKG="com.android.vending"
+XTAGS="allow-in-power-save-except-idle"
 NULL="/dev/null"
+
+# Return 0 if the file has any entry to be removed
+HAS_ENTRY() {
+for P in $PKGS; do
+for T in $TAGS; do
+grep -qF "$T package=\"$P\"" "$1" 2> "$NULL" && return 0
+done
+grep -qF "<wl>$P</wl>" "$1" 2> "$NULL" && return 0
+done
+for T in $XTAGS; do
+grep -qF "$T package=\"$XPKG\"" "$1" 2> "$NULL" && return 0
+done
+return 1
 }
+
+# Remove every entry from the file
+STRIP_ENTRY() {
+for P in $PKGS; do
+for T in $TAGS; do
+sed -i "\|$T package=\"$P\"|d" "$1"
+done
+sed -i "\|<wl>$P</wl>|d" "$1"
+done
+for T in $XTAGS; do
+sed -i "\|$T package=\"$XPKG\"|d" "$1"
+done
+}
+
 ui_print "- Searching default XML files"
 SYS_XML="$(
 SXML="$(find /system_ext/* /my_product/* /system/* /product/* \
 /vendor/* /india/* /my_bigball/* -type f -iname '*.xml' -print)"
 for S in $SXML; do
-if grep -qE "$STR1|$STR2|$STR3|$STR4" "$ROOT$S" 2> "$NULL" || \
-grep -qF "$STR5" "$ROOT$S" 2> "$NULL"; then
+if HAS_ENTRY "$ROOT$S"; then
 echo "$S"
 fi
 done
@@ -58,15 +81,7 @@ for SX in $SYS_XML; do
 mkdir -p "$(dirname $MODPATH$SX)"
 cp -af $ROOT$SX $MODPATH$SX
 ui_print "  Patching: $SX"
-sed -i \
--e "/$STR1/d" \
--e "/$STR2/d" \
--e "/$STR3/d" \
--e "/$STR4/d" \
-"$MODPATH/$SX"
-
-grep -vF "$STR5" "$MODPATH/$SX" > "$MODPATH/$SX.tmp"
-mv -f "$MODPATH/$SX.tmp" "$MODPATH/$SX"
+STRIP_ENTRY "$MODPATH/$SX"
 done
 
 # Merge patched files under /system dir
@@ -84,7 +99,7 @@ done
 MOD_XML="$(
 MXML="$(find /data/adb/* -type f -iname "*.xml" -print)"
 for M in $MXML; do
-if grep -qE "$STR1|$STR2|$STR3|$STR4" $M; then
+if HAS_ENTRY "$M"; then
 echo "$M"
 fi
 done
@@ -95,15 +110,7 @@ ui_print "- Searching conflicting XML"
 for MX in $MOD_XML; do
 MOD="$(echo "$MX" | awk -F'/' '{print $5}')"
 ui_print "  $MOD: $MX"
-sed -i \
--e "/$STR1/d" \
--e "/$STR2/d" \
--e "/$STR3/d" \
--e "/$STR4/d" \
-"$MX"
-
-grep -vF "$STR5" "$MX" > "$MX.tmp"
-mv -f "$MX.tmp" "$MX"
+STRIP_ENTRY "$MX"
 done
 }
 
@@ -137,6 +144,7 @@ find $MODPATH/* -maxdepth 0 \
 ! -name 'vendor' \
 ! -name 'system_ext' \
 ! -name 'leanbanner.jpg' \
+! -name 'uninstall.sh' \
 -exec rm -rf {} \;
 
 # Settings dir and file permission
