@@ -1,5 +1,7 @@
 # Universal GMS Doze Plus
 
+![](https://i.ibb.co/DDcNNP3C/1793044189104.png)
+
 ## Overview
 - Patches Google Play services (GMS) and Google Play Store so both can use battery optimization
 - Restricts Play Store background activity and disables GMS / Play Store / WebView telemetry components at boot

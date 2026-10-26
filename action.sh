@@ -1,10 +1,9 @@
 #!/system/bin/sh
 MODPATH=${0%/*}
 echo ""
-echo ""
-echo "▒█░░░ █▀▀ █▀▀█ █▀▀▄ "
-echo "▒█░░░ █▀▀ █▄▄█ █░░█ "
-echo "▒█▄▄█ ▀▀▀ ▀░░▀ ▀░░▀"
+echo "▒█▀▀█ ▒█▀▄▀█ ▒█▀▀▀█ "
+echo "▒█░▄▄ ▒█▒█▒█ ░▀▀▀▄▄ "
+echo "▒█▄▄█ ▒█░░▒█ ▒█▄▄▄█░🄳🄾🅉🄴[+]"
 echo ""
 echo "By @LeanHijosdesusMadres"
 echo "" 

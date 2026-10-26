@@ -8,7 +8,11 @@ set -x
 # open-source loving GL-DP and all contributors;
 # Patches Google Play services app and certain processes/services to be able to use battery optimization
 #
-
+echo ""
+echo "▒█▀▀█ ▒█▀▄▀█ ▒█▀▀▀█ "
+echo "▒█░▄▄ ▒█▒█▒█ ░▀▀▀▄▄ "
+echo "▒█▄▄█ ▒█░░▒█ ▒█▄▄▄█░🄳🄾🅉🄴[+]"
+echo ""
 # Check root implementation
 ui_print "- Checking root implementation"
 if [ "$BOOTMODE" ] && [ "$KSU" ]; then
@@ -152,6 +156,8 @@ ui_print "  Settings permissions"
 set_perm_recursive $MODPATH 0 0 0755 0755
 set_perm $MODPATH/system/bin/gmsc 0 2000 0755
 }
-
+echo ""
+echo "+ By @LeanHijosdesusMadres"
+echo ""
 # Final adjustment
 ADDON && FINALIZE
